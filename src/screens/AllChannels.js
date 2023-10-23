@@ -1,9 +1,14 @@
-import { FlatList, Text, View, TouchableOpacity, StyleSheet } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { FlatList, Text, View, TouchableOpacity, StyleSheet,Alert,RefreshControl } from 'react-native'
+import React, { useEffect, useState,useContext } from 'react'
 import { getAllChannel } from '../services'
+
+
+import AuthContext from '../Components/AuthProvider'
 
 import PersonIcon from 'react-native-vector-icons/Fontisto'
 import LogoutIcon from 'react-native-vector-icons/SimpleLineIcons'
+
+import Spinner from 'react-native-loading-spinner-overlay'
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -14,46 +19,107 @@ const AllChannels = ({ navigation, ...props }) => {
     const [chat, setChat] = useState([])
     const [isGroup, setIsGroup] = useState(false)
     const [username, setUserName] = useState("")
+    const [loading,setLoading]=useState(false)
+
+    const [refreshing, setRefreshing] = useState(false); // Control for the refresh action
+
+    const {setUser}=useContext(AuthContext)
 
     useEffect(() => {
-        async function getChannelData() {
-            try {
-                let tempchat = [], tempchannel = []
-
-                const res = await getAllChannel(props.route.params)
-                console.log(res.result.channels[0].authorizedGroupFullName)
-                for (let i = 0; i < res.result.channels.length; i++) {
-                    if (res.result.channels[i].authorizedGroupFullName != "User types / Internal User") {
-                        tempchat.push(res.result.channels[i])
-
-                    }
-                    else {
-
-                        tempchannel.push(res.result.channels[i])
-
-                    }
-                }
-
-                setChat(tempchat)
-                setAllChannel(tempchannel)
-
-                setUserName(await AsyncStorage.getItem('username'))
-
-            } catch (error) {
-
-            }
-        }
-        getChannelData()
+       
+        GetChannelData()
 
     }, [])
 
 
+    const  GetChannelData= async()=> {
+        setLoading(true)
+        try {
+            let tempchat = [], tempchannel = []
+
+            const res = await getAllChannel(props.route.params)
+            console.log(">>>>>>>>>>>>>>>>>>",res.result.channels[0].authorizedGroupFullName)
+            for (let i = 0; i < res.result.channels.length; i++) {
+                if (res.result.channels[i].authorizedGroupFullName != "User types / Internal User") {
+                    tempchat.push(res.result.channels[i])
+
+                }
+                else {
+
+                    tempchannel.push(res.result.channels[i])
+
+                }
+            }
+
+            setChat(tempchat)
+            setAllChannel(tempchannel)
+            
+            
+            setUserName(await AsyncStorage.getItem('username'))
+           
+
+
+        } catch (error) {
+           console.log("error",error)
+        }
+
+        setLoading(false)
+    }
+
     console.log(username)
+
+
+    const RemoveSession = async () => {
+        await AsyncStorage.removeItem("uid")
+        await AsyncStorage.removeItem("username")
+        await AsyncStorage.removeItem("email")
+        setUser(null)
+       
+      }
+
+
+
+      const onLogout = async () => {
+        try {
+          Alert.alert(
+            'Logout',
+            'Do you want to Logout?',
+            [
+              { text: 'No', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+              { text: 'Yes', onPress: () => RemoveSession() },
+            ],
+            {
+              cancelable: false,
+              textstyle: styles.alertText
+    
+            });
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
+
+      const handleRefresh = () => {
+        setRefreshing(true);
+    
+        // Fetch new data or perform any other refresh action here
+        // Once the refresh is complete, update the data source and set refreshing to false
+        setTimeout(() => {
+           GetChannelData()
+          setRefreshing(false);
+        }, 1000); // Simulating a delay, replace with your actual data fetching logic
+      };
     return (
         <View style={styles.mainContainer}>
+             {
+                loading ?
+                    <Spinner visible={true} />
+                    :
+                    null
+            }
             <View style={styles.upperContainer}>
                 <View style={styles.header}>
-                    <TouchableOpacity onPress={() => alert("are you sure to logout?")}>
+                    <TouchableOpacity onPress={() => onLogout()}>
                         <LogoutIcon name='logout' color={"#FFFFFF"} size={20} style={{ marginLeft: 12 }} />
                     </TouchableOpacity>
                 </View>
@@ -115,7 +181,12 @@ const AllChannels = ({ navigation, ...props }) => {
                             </>
                         )
                     }}
-
+                    refreshControl={
+                        <RefreshControl
+                          refreshing={refreshing}
+                          onRefresh={handleRefresh}
+                        />
+                      }
                 />
 
 

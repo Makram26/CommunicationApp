@@ -1,7 +1,8 @@
 import { Text, TouchableOpacity, View, TextInput } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState,useContext } from 'react'
 import { login, storeCredential } from '../services'
 import Spinner from 'react-native-loading-spinner-overlay';
+import AuthContext from '../Components/AuthProvider';
 
 
 
@@ -10,6 +11,8 @@ const Login = ({ navigation }) => {
     const [password, setPassword] = useState("")
     const [db, setDb] = useState("")
     const [loading, setLoading] = useState(false)
+
+    const {setUser} = useContext(AuthContext)
 
 
 
@@ -32,7 +35,7 @@ const Login = ({ navigation }) => {
             try {
                 setLoading(true)
                 const response = await login(username.trim(), password.trim(), db.trim())
-                console.log(response)
+                console.log(response.result.name)
 
                 if (response.error && response.error.data.message != "Access Denied") {
                     alert(`database ${db} does not exist`)
@@ -50,7 +53,8 @@ const Login = ({ navigation }) => {
                     storeCredential(username.trim(), response.result.uid,response.result.name)
                     // setUser(response.result.uid)
                     setLoading(false)
-                    navigation.navigate("AllChannels", response.result.uid)
+                    setUser(response.result.uid)
+                    // navigation.navigate("AllChannels", response.result.uid)
                 }
                 else {
                     setLoading(false)

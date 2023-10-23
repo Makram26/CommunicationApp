@@ -2,7 +2,9 @@
 // const BASE_URL = 'https://sufyan.go-tropa.com';
 // const BASE_URL = 'http://192.168.70.184:8069';
 // BASE URL
-const BASE_URL = 'http://10.1.1.58:8069';
+// const BASE_URL = 'http://10.1.1.58:8069';
+const BASE_URL = 'http://192.168.10.3:8069';
+
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -92,7 +94,7 @@ export const usersendMessage = (channelId, message) => {
 
 // session management 
 export const storeCredential = async (usermail,uid,username) => {
-    // console.log("username>>>>>>>", username)
+    console.log("username>>>>>>>", username)
     try {
         await AsyncStorage.setItem('email', usermail.toString())
         // await AsyncStorage.setItem('email', email)
