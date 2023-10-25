@@ -33,11 +33,13 @@ const AllChannels = ({ navigation, ...props }) => {
 
 
     const  GetChannelData= async()=> {
-        setLoading(true)
+        // setLoading(true)
+
+        const webURL=await AsyncStorage.getItem("URL")
         try {
             let tempchat = [], tempchannel = []
 
-            const res = await getAllChannel(props.route.params)
+            const res = await getAllChannel(webURL)
             console.log(">>>>>>>>>>>>>>>>>>",res.result.channels[0].authorizedGroupFullName)
             for (let i = 0; i < res.result.channels.length; i++) {
                 if (res.result.channels[i].authorizedGroupFullName != "User types / Internal User") {
@@ -63,7 +65,7 @@ const AllChannels = ({ navigation, ...props }) => {
            console.log("error",error)
         }
 
-        setLoading(false)
+        // setLoading(false)
     }
 
     console.log(username)
@@ -73,6 +75,8 @@ const AllChannels = ({ navigation, ...props }) => {
         await AsyncStorage.removeItem("uid")
         await AsyncStorage.removeItem("username")
         await AsyncStorage.removeItem("email")
+        await AsyncStorage.removeItem("URL")
+
         setUser(null)
        
       }
@@ -111,12 +115,12 @@ const AllChannels = ({ navigation, ...props }) => {
       };
     return (
         <View style={styles.mainContainer}>
-             {
+             {/* {
                 loading ?
                     <Spinner visible={true} />
                     :
                     null
-            }
+            } */}
             <View style={styles.upperContainer}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => onLogout()}>
@@ -143,7 +147,7 @@ const AllChannels = ({ navigation, ...props }) => {
                                     item.name.slice(0, 7) != "OdooBot" ?
                                         <TouchableOpacity onPress={() => navigation.navigate("ChatScreen", item.id)}>
 
-                                            <View style={{ borderWidth: 0.2, borderColor: "#71639E", marginTop: 10 }} />
+                                            <View style={{ borderWidth: 0.5, borderColor: "#71639E", marginTop: 10 }} />
                                             <View style={styles.card}>
                                                 <View style={{ flexDirection: "row", }}>
                                                     <View style={styles.box}>

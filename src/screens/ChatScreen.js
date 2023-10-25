@@ -3,6 +3,7 @@ import { View, ScrollView, TextInput, TouchableOpacity, BackHandler, Text, Dimen
 import Icon from 'react-native-vector-icons/Entypo';
 import SendIcon from 'react-native-vector-icons/Ionicons';
 import HTML from 'react-native-render-html';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usersendMessage } from '../services';
 
 const contentWidth = Dimensions.get('window').width;
@@ -13,10 +14,19 @@ const ChatScreen = ({ navigation, ...props }) => {
     const scrollViewRef = useRef(null);
     const ws = useRef(null);
 
+   
 
 
-    const connectWebSocket = () => {
-        ws.current = new WebSocket('ws://10.1.1.58:8069/websocket');
+
+    const connectWebSocket = async () => {
+
+
+        const webURL=await AsyncStorage.getItem("URL")
+
+
+        console.log(`ws:${webURL.slice(5)}/websocket`)
+        
+        ws.current = new WebSocket(`ws:${webURL.slice(5)}/websocket`);
 
         ws.current.onopen = () => {
             ws.current.send(JSON.stringify({ "event_name": "subscribe", "data": { "channels": [], "last": 0 } }));
@@ -89,10 +99,11 @@ const ChatScreen = ({ navigation, ...props }) => {
 
     const sendMessage = async () => {
         // Send your message and handle it accordingly
+        const webURL=await AsyncStorage.getItem("URL")
 
         setMessage("")
         // scrollViewRef.current.focus()
-        const res = await usersendMessage(props.route.params, message)
+        const res = await usersendMessage(props.route.params, message,webURL)
     };
 
     const handleBackButton = () => {

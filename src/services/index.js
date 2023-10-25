@@ -3,15 +3,15 @@
 // const BASE_URL = 'http://192.168.70.184:8069';
 // BASE URL
 // const BASE_URL = 'http://10.1.1.58:8069';
-const BASE_URL = 'http://192.168.10.3:8069';
+const BASE_URL = 'http://10.1.1.65:8069';
 
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // calling login API
-export const login = (username, password, DATABASE_NAME) => {
-    console.log(`${BASE_URL}/web/session/authenticate`)
-    return fetch(`${BASE_URL}/web/session/authenticate`, {
+export const login = (username, password, DATABASE_NAME,Url) => {
+    console.log(`${Url}/web/session/authenticate`)
+    return fetch(`${Url}/web/session/authenticate`, {
         method: 'POST',
         headers: {
             'Accept': 'application/json, text/plain, /',
@@ -29,9 +29,9 @@ export const login = (username, password, DATABASE_NAME) => {
 }
 
 
-export const getAllChannel = (uid) => {
-      console.log(`${BASE_URL}/mail/init_messaging`)
-    return fetch(`${BASE_URL}/mail/init_messaging`, {
+export const getAllChannel = (Url) => {
+      console.log(`${Url}/mail/init_messaging`)
+    return fetch(`${Url}/mail/init_messaging`, {
         method: 'POST',
         headers: {
             'Accept': 'application/json, text/plain, /',
@@ -53,9 +53,9 @@ export const getAllChannel = (uid) => {
 //     772600
 
 
-export const getAllMeassage = (channelId) => {
-
-    return fetch(`${BASE_URL}/mail/channel/messages/`, {
+export const getAllMeassage = (Url) => {
+console.log(`${Url}/mail/channel/messages/`)
+    return fetch(`${Url}/mail/channel/messages/`, {
         method: 'POST',
         headers: {
             'Accept': 'application/json, text/plain, /',
@@ -66,9 +66,9 @@ export const getAllMeassage = (channelId) => {
 
 
 
-export const usersendMessage = (channelId, message) => {
-
-    return fetch(`${BASE_URL}/mail/message/post`, {
+export const usersendMessage = (channelId, message,Url) => {
+    console.log(`${Url}/mail/message/post`)
+    return fetch(`${Url}/mail/message/post`, {
         method: 'POST',
         headers: {
             'Accept': 'application/json, text/plain, /',
@@ -93,13 +93,15 @@ export const usersendMessage = (channelId, message) => {
 
 
 // session management 
-export const storeCredential = async (usermail,uid,username) => {
+export const storeCredential = async (usermail,uid,username,Url) => {
     console.log("username>>>>>>>", username)
     try {
         await AsyncStorage.setItem('email', usermail.toString())
         // await AsyncStorage.setItem('email', email)
         await AsyncStorage.setItem('uid', uid.toString())
         await AsyncStorage.setItem('username', username.toString())
+        await AsyncStorage.setItem('URL', Url.toString())
+
     } catch (e) {
         console.log("error", e)
     }
