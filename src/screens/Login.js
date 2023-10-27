@@ -56,7 +56,7 @@ const Login = ({ navigation }) => {
                     }
 
 
-                    storeCredential(username.trim(), response.result.uid, response.result.name, url.trim())
+                    storeCredential(username.trim(), response.result.uid, response.result.name, url.trim(), response.result.partner_id)
                     // setUser(response.result.uid)
                     setTimeout(() => {
                         setLoading(false)

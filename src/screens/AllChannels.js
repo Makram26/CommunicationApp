@@ -1,5 +1,5 @@
-import { FlatList, Text, View, TouchableOpacity, StyleSheet,Alert,RefreshControl } from 'react-native'
-import React, { useEffect, useState,useContext } from 'react'
+import { FlatList, Text, View, TouchableOpacity, StyleSheet, Alert, RefreshControl } from 'react-native'
+import React, { useEffect, useState, useContext } from 'react'
 import { getAllChannel } from '../services'
 
 
@@ -19,28 +19,34 @@ const AllChannels = ({ navigation, ...props }) => {
     const [chat, setChat] = useState([])
     const [isGroup, setIsGroup] = useState(false)
     const [username, setUserName] = useState("")
-    const [loading,setLoading]=useState(false)
+    const [loading, setLoading] = useState(false)
+    const [partnerID,setPartnerID]=useState("")
 
     const [refreshing, setRefreshing] = useState(false); // Control for the refresh action
 
-    const {setUser}=useContext(AuthContext)
+    const { setUser } = useContext(AuthContext)
 
     useEffect(() => {
-       
+
         GetChannelData()
 
     }, [])
 
 
-    const  GetChannelData= async()=> {
+    const GetChannelData = async () => {
         // setLoading(true)
+        const temp_partnerID = await AsyncStorage.getItem("partnerId")
+        setPartnerID(temp_partnerID)
 
-        const webURL=await AsyncStorage.getItem("URL")
+
+       
+
+        const webURL = await AsyncStorage.getItem("URL")
         try {
             let tempchat = [], tempchannel = []
 
             const res = await getAllChannel(webURL)
-            console.log(">>>>>>>>>>>>>>>>>>",res.result.channels[0].authorizedGroupFullName)
+            console.log(">>>>>>>>>>>>>>>>>>", res.result.channels[0].authorizedGroupFullName)
             for (let i = 0; i < res.result.channels.length; i++) {
                 if (res.result.channels[i].authorizedGroupFullName != "User types / Internal User") {
                     tempchat.push(res.result.channels[i])
@@ -55,14 +61,14 @@ const AllChannels = ({ navigation, ...props }) => {
 
             setChat(tempchat)
             setAllChannel(tempchannel)
-            
-            
+
+
             setUserName(await AsyncStorage.getItem('username'))
-           
+
 
 
         } catch (error) {
-           console.log("error",error)
+            console.log("error", error)
         }
 
         // setLoading(false)
@@ -78,44 +84,48 @@ const AllChannels = ({ navigation, ...props }) => {
         await AsyncStorage.removeItem("URL")
 
         setUser(null)
-       
-      }
+
+    }
 
 
 
-      const onLogout = async () => {
+    const onLogout = async () => {
         try {
-          Alert.alert(
-            'Logout',
-            'Do you want to Logout?',
-            [
-              { text: 'No', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-              { text: 'Yes', onPress: () => RemoveSession() },
-            ],
-            {
-              cancelable: false,
-              textstyle: styles.alertText
-    
-            });
+            Alert.alert(
+                'Logout',
+                'Do you want to Logout?',
+                [
+                    { text: 'No', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+                    { text: 'Yes', onPress: () => RemoveSession() },
+                ],
+                {
+                    cancelable: false,
+                    textstyle: styles.alertText
+
+                });
         } catch (err) {
-          console.log(err)
+            console.log(err)
         }
-      }
+    }
 
 
-      const handleRefresh = () => {
+    const handleRefresh = () => {
         setRefreshing(true);
-    
+
         // Fetch new data or perform any other refresh action here
         // Once the refresh is complete, update the data source and set refreshing to false
         setTimeout(() => {
-           GetChannelData()
-          setRefreshing(false);
+            GetChannelData()
+            setRefreshing(false);
         }, 1000); // Simulating a delay, replace with your actual data fetching logic
-      };
+    };
+
+
+
+    console.log("partnerId >>>>>>>>>", partnerID)
     return (
         <View style={styles.mainContainer}>
-             {/* {
+            {/* {
                 loading ?
                     <Spinner visible={true} />
                     :
@@ -145,7 +155,10 @@ const AllChannels = ({ navigation, ...props }) => {
                             <>
                                 {
                                     item.name.slice(0, 7) != "OdooBot" ?
-                                        <TouchableOpacity onPress={() => navigation.navigate("ChatScreen", item.id)}>
+                                        <TouchableOpacity onPress={() => navigation.navigate("ChatScreen", {id:item.id,parterId:partnerID,name:isGroup ?
+                                            item.name
+                                            :
+                                            item.name == username ? item.name : item.name.replace(new RegExp(username, 'i'), '').replace(/,\s*/, '').trim()})}>
 
                                             <View style={{ borderWidth: 0.5, borderColor: "#71639E", marginTop: 10 }} />
                                             <View style={styles.card}>
@@ -187,10 +200,10 @@ const AllChannels = ({ navigation, ...props }) => {
                     }}
                     refreshControl={
                         <RefreshControl
-                          refreshing={refreshing}
-                          onRefresh={handleRefresh}
+                            refreshing={refreshing}
+                            onRefresh={handleRefresh}
                         />
-                      }
+                    }
                 />
 
 
@@ -201,8 +214,8 @@ const AllChannels = ({ navigation, ...props }) => {
                     onPress={() => setIsGroup(false)}
                     style={styles.b_mainContainer}
                 >
-                    <PersonIcon name='person' color={isGroup ? "#0f0f0f":"#71639E" } size={20} />
-                    <Text style={{...styles.tabTextStyle,color: isGroup ?"#0f0f0f" :"#71639E" }}>Chat</Text>
+                    <PersonIcon name='person' color={isGroup ? "#0f0f0f" : "#71639E"} size={20} />
+                    <Text style={{ ...styles.tabTextStyle, color: isGroup ? "#0f0f0f" : "#71639E" }}>Chat</Text>
 
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -210,7 +223,7 @@ const AllChannels = ({ navigation, ...props }) => {
                     style={styles.b_mainContainer}
                 >
                     <PersonIcon name='persons' color={isGroup ? "#71639E" : "#0f0f0f"} size={20} />
-                    <Text style={{...styles.tabTextStyle,color:isGroup ? "#71639E" : "#0f0f0f"}}>Channel</Text> 
+                    <Text style={{ ...styles.tabTextStyle, color: isGroup ? "#71639E" : "#0f0f0f" }}>Channel</Text>
                 </TouchableOpacity>
             </View>
 
@@ -274,9 +287,9 @@ const styles = StyleSheet.create({
     tabTextStyle: {
         fontSize: 15,
         fontWeight: "600",
-       
+
         padding: 5
-        
+
         // 71639E
     }
 
